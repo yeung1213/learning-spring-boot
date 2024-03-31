@@ -1,5 +1,7 @@
 package com.yeung.learning.restcontrollers;
 
+import java.io.IOException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -8,8 +10,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.server.ResponseStatusException;
 
-import com.yeung.learning.dtos.MyResponse;
 import com.yeung.learning.services.OAuthService;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @RestController
 @RequestMapping("api/oauth")
@@ -18,15 +21,16 @@ public class OAuthRestcontroller {
     OAuthService oAuthService;
 
     @GetMapping("google/callback")
-    public MyResponse oauth(@RequestParam("code") String code) {
-        final MyResponse response = new MyResponse();
+    public void oauth(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
+        System.out.println("~~~~~");
         if (code == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
         }
-        String result = oAuthService.getGoogleToken(code);
-        response.setData(result);
+        oAuthService.getGoogleToken(code);
         System.out.println(code);
-        return response;
+        response.sendRedirect("http://localhost:3000/about");
+        // return new MyResponse();
+        return;
     }
 
 }

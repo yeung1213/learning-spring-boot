@@ -10,10 +10,15 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtException;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
+import org.springframework.security.oauth2.server.resource.web.BearerTokenResolver;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.util.StringUtils;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 
 // @EnableWebSecurity
 // @EnableMethodSecurity
@@ -24,19 +29,32 @@ public class SecurityConfiguration {
     @Value("${spring.security.oauth2.resourceserver.jwt.jwk-set-uri}")
     private String jwkSetUri;
 
+    public class CustomBearerTokenResolver implements BearerTokenResolver {
+
+        @Override
+        public String resolve(HttpServletRequest request) {
+            HttpSession session = request.getSession();
+            String token = (String) session.getAttribute("token");
+            if (StringUtils.hasText(token)) {
+                return token;
+            }
+            return null;
+        }
+    }
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.authorizeHttpRequests(
-                authorize -> authorize.requestMatchers("api/auth/**")
-                        .permitAll()
-                        .requestMatchers("api/oauth/**")
-                        .permitAll()
-                        .requestMatchers("api/test/**")
-                        .permitAll()
-                        .anyRequest()
-                        .authenticated());
+        http.authorizeHttpRequests(authorize -> authorize.requestMatchers("api/auth/**")
+                .permitAll()
+                .requestMatchers("api/oauth/**")
+                .permitAll()
+                .requestMatchers("api/test/**")
+                .permitAll()
+                .anyRequest()
+                .authenticated());
         http.sessionManagement((s) -> s.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED));
         http.oauth2ResourceServer((oauth2ResourceServer) -> oauth2ResourceServer
+                .bearerTokenResolver(new CustomBearerTokenResolver())
                 .jwt(jwt -> jwt.decoder(jwtDecoder())));
         http.cors(cors -> cors.configurationSource(corsConfigurationSource()));
         http.csrf(Customizer.withDefaults());
