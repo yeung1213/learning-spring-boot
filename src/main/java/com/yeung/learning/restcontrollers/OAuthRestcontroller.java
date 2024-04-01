@@ -21,7 +21,7 @@ public class OAuthRestcontroller {
     OAuthService oAuthService;
 
     @GetMapping("google/callback")
-    public void oauth(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
+    public void googleCallback(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
         System.out.println("~~~~~");
         if (code == null) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
@@ -30,6 +30,17 @@ public class OAuthRestcontroller {
         System.out.println(code);
         response.sendRedirect("http://localhost:3000/about");
         // return new MyResponse();
+        return;
+    }
+
+    @GetMapping("okta/callback")
+    public void oktaCallback(@RequestParam("code") String code, HttpServletResponse response) throws IOException {
+        System.out.println("~~~~~~~~~~ okta/callback");
+        if (code == null) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED);
+        }
+        System.out.println("code: " + code);
+        oAuthService.getOktaToken(code);
         return;
     }
 
