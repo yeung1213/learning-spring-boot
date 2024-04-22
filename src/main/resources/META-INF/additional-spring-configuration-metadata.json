@@ -1,5 +1,29 @@
-{"properties": [{
-  "name": "com.yeung.learning.azure-key-vault-testing-key",
-  "type": "java.lang.String",
-  "description": "A description for 'com.yeung.learning.azure-key-vault-testing-key'"
-}]}
+{
+  "properties": [
+    {
+      "name": "com.yeung.learning.azure-key-vault-testing-key",
+      "type": "java.lang.String",
+      "description": "A description for 'com.yeung.learning.azure-key-vault-testing-key'"
+    },
+    {
+      "name": "com.yeung.learning.okta.token-uri",
+      "type": "java.lang.String",
+      "description": "A description for 'com.yeung.learning.okta.token-uri'"
+    },
+    {
+      "name": "com.yeung.learning.google.token-uri",
+      "type": "java.lang.String",
+      "description": "A description for 'com.yeung.learning.google.token-uri'"
+    },
+    {
+      "name": "com.yeung.learning.okta.jwk-set-uri",
+      "type": "java.lang.String",
+      "description": "A description for 'com.yeung.learning.okta.token-uri'"
+    },
+    {
+      "name": "com.yeung.learning.google.jwk-set-uri",
+      "type": "java.lang.String",
+      "description": "A description for 'com.yeung.learning.google.token-uri'"
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 package com.yeung.learning.services;
 
 import java.text.MessageFormat;
+import java.time.Duration;
 import java.util.Base64;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 
 import com.yeung.learning.dtos.GoogleTokenResponse;
+import com.yeung.learning.dtos.OktaTokenResponse;
 import com.yeung.learning.dtos.TokenRequest;
 
 import jakarta.servlet.http.HttpSession;
@@ -38,6 +40,12 @@ public class OAuthService {
     @Value("${spring.security.oauth2.client.registration.okta.client-secret}")
     private String oktaClientSecret;
 
+    @Value("${com.yeung.learning.okta.token-uri}")
+    private String oktaTokenUri;
+
+    @Value("${com.yeung.learning.google.token-uri}")
+    private String googleTokenUri;
+
     public void getGoogleToken(String code) {
         RestTemplate restTemplate = new RestTemplate();
         TokenRequest request = new TokenRequest();
@@ -47,11 +55,12 @@ public class OAuthService {
         request.setGrantType("authorization_code");
         request.setRedirectUri("http://localhost:8080/api/oauth/google/callback");
         GoogleTokenResponse res = restTemplate.postForObject(
-                "https://accounts.google.com/o/oauth2/token",
+                googleTokenUri,
                 request,
                 GoogleTokenResponse.class);
         System.out.println(res);
         if (res != null) {
+            httpSession.setAttribute("tokenType", "google");
             httpSession.setAttribute("token", res.geIdToken());
         }
     }
@@ -73,13 +82,26 @@ public class OAuthService {
         HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(map, headers);
 
         @SuppressWarnings("null")
-        ResponseEntity<GoogleTokenResponse> res = restTemplate.exchange(
-                "https://dev-25918791.okta.com/oauth2/default/v1/token",
-                HttpMethod.POST, entity, GoogleTokenResponse.class);
+        ResponseEntity<OktaTokenResponse> res = restTemplate.exchange(
+                oktaTokenUri,
+                HttpMethod.POST, entity, OktaTokenResponse.class);
 
-        System.out.println(res.getBody());
-        // if (res != null) {
-        // httpSession.setAttribute("token", res.geIdToken());
-        // }
+        System.out.println("abcdefg~~~");
+        OktaTokenResponse oktaToken = res.getBody();
+        if (oktaToken == null) {
+            return;
+        }
+        String idToken = oktaToken.geIdToken();
+        if (idToken == null) {
+            return;
+        }
+        httpSession.setAttribute("tokenType", "okta");
+        httpSession.setAttribute("token", idToken);
     }
+
+    public void clearSession() {
+        httpSession.removeAttribute("tokenType");
+        httpSession.removeAttribute("token");
+    }
+
 }

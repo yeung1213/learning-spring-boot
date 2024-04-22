@@ -10,22 +10,15 @@ import jakarta.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
-
 @RestController
-@RequestMapping("api/test")
-public class TestRestcontroller {
-    @Autowired
-    TestingService testingService;
-
+@RequestMapping("api/test-auth")
+public class TestAuthRestcontroller {
     @GetMapping("")
     public MyResponse root(HttpSession session) {
         final MyResponse response = new MyResponse();
-        System.out.println(session.getAttribute("testing"));
+        System.out.println("Hello World I am in test-auth: " + session.getAttribute("testing"));
         session.setAttribute("testing", "testing");
         response.setData("Hello, World!");
-        testingService.testing();
-        System.out.println("~~~~~");
         return response;
     }
-
 }
